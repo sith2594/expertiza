@@ -7,10 +7,12 @@
       <th class="head">Role</th>
       <th class="head">Self Introduction</th>
       <th class="head" colspan="2">Status</th>
-      <!--<th class="head">Actions</th>-->
+      
+      <!--Changes by Sumitosh Pal, Mounika for using checkboxes instead of radio buttons-->
       <%= form_tag action: :create_approved_user do %>
       <th class="head"> <%= submit_tag "Accept"%></th>
       <th class="head"> <%= submit_tag "Reject"%></th>
+      <!--Changes by Sumitosh Pal, Mounika for using checkboxes instead of radio buttons-->
     </tr>
 
     <% @requested_users.each do |requested_user| %>
@@ -22,11 +24,9 @@
           <td><%= requested_user.self_introduction %></td>
           <td colspan="2"><%= requested_user.status %></td>
           <% if requested_user.status == 'Under Review' %>
-            <!--<td> <input type="radio" name="status" value="Approved"> Accept </td>
-            <td> <input type="radio" name="status" value="Rejected"> Reject </td>-->
-            <!--<td colspan="4"><input type="checkbox" class = "selection" name="id" value="#{requested_user.id}"></td>-->
+          <!--Changes by Sumitosh Pal, Mounika for using checkboxes instead of radio buttons-->
             <td colspan="2"><%= check_box("selection", requested_user.id, {}, true, false)%></td>
-            <!--<td> <%= submit_tag "Submit"%> </td>-->
+            <!--Changes by Sumitosh Pal, Mounika for using checkboxes instead of radio buttons-->
           <% else %>
             <td colspan="4"></td>
           <% end %>

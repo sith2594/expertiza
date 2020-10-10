@@ -28,6 +28,8 @@ class AccountRequestController < ApplicationController
   end
 
   def create_approved_user
+    # Changes by Sumitosh Pal, Mounika for using checkboxes instead of radio buttons
+    # Getting list of user ids that the checkbox has collected
     users = params[:selection]
     users.each do |user|
       requested_user = AccountRequest.find_by(id: user.first) #Using user.first from each block instead of params[:id]
@@ -67,6 +69,7 @@ class AccountRequestController < ApplicationController
         end
       end
     end
+    # Changes by Sumitosh Pal, Mounika for using checkboxes instead of radio buttons
     redirect_to action: 'list_pending_requested'
   end
 
