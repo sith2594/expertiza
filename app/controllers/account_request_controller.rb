@@ -28,40 +28,43 @@ class AccountRequestController < ApplicationController
   end
 
   def create_approved_user
-    requested_user = AccountRequest.find_by(id: params[:id])
-    requested_user.status = params[:status]
-    if requested_user.status.nil?
-      flash[:error] = "Please Approve or Reject before submitting"
-    elsif requested_user.update_attributes(params[:user])
-      flash[:success] = "The user \"#{requested_user.name}\" has been successfully updated."
-    end
-    if requested_user.status == "Approved"
-      new_user = User.new
-      new_user.name = requested_user.name
-      new_user.role_id = requested_user.role_id
-      new_user.institution_id = requested_user.institution_id
-      new_user.fullname = requested_user.fullname
-      new_user.email = requested_user.email
-      new_user.parent_id = session[:user].id
-      new_user.timezonepref = User.find_by(id: new_user.parent_id).timezonepref
-      if new_user.save
-        password = new_user.reset_password
-        # Mail is sent to the user with a new password
-        prepared_mail = MailerHelper.send_mail_to_user(new_user, "Your Expertiza account and password have been created.", "user_welcome", password)
-        prepared_mail.deliver
-        flash[:success] = "A new password has been sent to new user's e-mail address."
-        undo_link("The user \"#{requested_user.name}\" has been successfully created. ")
-      else
-        foreign
+    users = params[:selection]
+    users.each do |user|
+      requested_user = AccountRequest.find_by(id: user.first) #Using user.first from each block instead of params[:id]
+      requested_user.status = params[:commit] #Using params[:commit] instead of params[:status]
+      if requested_user.status.nil?
+        flash[:error] = "Please Approve or Reject before submitting"
+      elsif requested_user.update_attributes(params[:user])
+        flash[:success] = "The user \"#{requested_user.name}\" has been successfully updated."
       end
-    elsif requested_user.status == "Rejected"
-      # If the user request has been rejected, a flash message is shown and redirected to review page
-      if requested_user.update_columns(status: params[:status])
-        flash[:success] = "The user \"#{requested_user.name}\" has been Rejected."
-        redirect_to action: 'list_pending_requested'
-        return
-      else
-        flash[:error] = "Error processing request."
+      if requested_user.status == "Approved"
+        new_user = User.new
+        new_user.name = requested_user.name
+        new_user.role_id = requested_user.role_id
+        new_user.institution_id = requested_user.institution_id
+        new_user.fullname = requested_user.fullname
+        new_user.email = requested_user.email
+        new_user.parent_id = session[:user].id
+        new_user.timezonepref = User.find_by(id: new_user.parent_id).timezonepref
+        if new_user.save
+          password = new_user.reset_password
+          # Mail is sent to the user with a new password
+          prepared_mail = MailerHelper.send_mail_to_user(new_user, "Your Expertiza account and password have been created.", "user_welcome", password)
+          prepared_mail.deliver
+          flash[:success] = "A new password has been sent to new user's e-mail address."
+          undo_link("The user \"#{requested_user.name}\" has been successfully created. ")
+        else
+          foreign
+        end
+      elsif requested_user.status == "Rejected"
+        # If the user request has been rejected, a flash message is shown and redirected to review page
+        if requested_user.update_columns(status: params[:status])
+          flash[:success] = "The user \"#{requested_user.name}\" has been Rejected."
+          redirect_to action: 'list_pending_requested'
+          return
+        else
+          flash[:error] = "Error processing request."
+        end
       end
     end
     redirect_to action: 'list_pending_requested'
@@ -80,7 +83,10 @@ class AccountRequestController < ApplicationController
   end
 
   def list_pending_requested
-    @requested_users = AccountRequest.all
+    #@requested_users = AccountRequest.where('status = ?', 'Under Review') #display only pending requests
+    # @requested_users = AccountRequest.all.order(created_at: :desc) #display all in reverse chrolonogical order
+    @requested_users = AccountRequest.all.order(created_at: :desc).paginate(page: params[:page], per_page: 10) #display all requests with pagination and in reverse chronologigal order
+    # @requested_users = AccountRequest.all
     @roles = Role.all
   end
 
