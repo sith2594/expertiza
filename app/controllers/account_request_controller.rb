@@ -37,7 +37,7 @@ class AccountRequestController < ApplicationController
       if requested_user.status.nil?
         flash[:error] = "Please Approve or Reject before submitting"
       elsif requested_user.update_attributes(params[:user])
-        flash[:success] = "The user \"#{requested_user.name}\" has been successfully updated."
+        flash[:success] = flash[:success].to_s + "The user \"#{requested_user.name}\" has been successfully updated.<br/>"
       end
       if requested_user.status == "Approved"
         new_user = User.new
