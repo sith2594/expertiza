@@ -1,5 +1,6 @@
 
 class AccountRequestController < ApplicationController
+  include AuthorizationHelper
   autocomplete :user, :name
   # GETs should be safe (see http://www.w3.org/2001/tag/doc/whenToUseGet.html)
   verify method: :post, only: %i[destroy create update],
@@ -30,6 +31,11 @@ class AccountRequestController < ApplicationController
   def create_approved_user
     # Changes by Sumitosh Pal, Mounika for using checkboxes instead of radio buttons
     # Getting list of user ids that the checkbox has collected
+    if params[:selection] == nil
+        flash[:error] = "Please Approve or Reject before submitting"
+        redirect_to action: 'list_pending_requested'
+      return 
+    end
     users = params[:selection]
     users.each do |user|
       requested_user = AccountRequest.find_by(id: user.first) #Using user.first from each block instead of params[:id]
@@ -69,6 +75,7 @@ class AccountRequestController < ApplicationController
         end
       end
     end
+    p flash[:success]
     # Changes by Sumitosh Pal, Mounika for using checkboxes instead of radio buttons
     redirect_to action: 'list_pending_requested'
   end

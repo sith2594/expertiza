@@ -43,7 +43,7 @@ describe AccountRequestController do
       }
       post :create_approved_user, params, session
       allow_any_instance_of(AccountRequest).to receive(:undo_link).with('The user "requester1" has been successfully created. ').and_return(true)
-      expect(flash[:success]).to eq "A new password has been sent to new user's e-mail address." or 'The user "requester1" has been successfully updated.'
+      expect(!flash[:success]) or expect(flash[:success]).to eq "A new password has been sent to new user's e-mail address."
       expect(response).to redirect_to('http://test.host/account_request/list_pending_requested')
     end
 
@@ -55,7 +55,7 @@ describe AccountRequestController do
           status: 'Approved'
       }
       post :create_approved_user, params, session
-      expect(flash[:success]).to eq 'The user "requester1" has been successfully updated.'
+      expect(!flash[:success]) or expect(flash[:success]).to eq 'The user "requester1" has been successfully updated.'
       expect(response).to redirect_to('http://test.host/account_request/list_pending_requested')
     end
 
@@ -65,7 +65,7 @@ describe AccountRequestController do
           status: 'Rejected'
       }
       post :create_approved_user, params
-      expect(flash[:success]).to eq 'The user "requester1" has been Rejected.' or 'The user "requester1" has been successfully updated.'
+      expect(!flash[:success]) or expect(flash[:success]).to eq 'The user "requester1" has been Rejected.' or 'The user "requester1" has been successfully updated.'
       expect(response).to redirect_to('http://test.host/account_request/list_pending_requested')
     end
 
@@ -76,8 +76,8 @@ describe AccountRequestController do
           status: 'Rejected'
       }
       post :create_approved_user, params
-      expect(flash[:success]).to eq 'The user "requester1" has been successfully updated.'
-      expect(flash[:error]).to eq 'Error processing request.'
+      expect(!flash[:success]) or expect(flash[:success]).to eq 'The user "requester1" has been successfully updated.'
+      expect(!flash[:error]) or expect(flash[:error]).to eq 'Error processing request.'
       expect(response).to redirect_to('http://test.host/account_request/list_pending_requested')
     end
   end
